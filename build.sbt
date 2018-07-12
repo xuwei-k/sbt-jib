@@ -1,5 +1,7 @@
 import ReleaseTransformations._
 import xerial.sbt.Sonatype._
+import java.lang.management.ManagementFactory
+import scala.collection.JavaConverters._
 
 organization := "de.gccc.sbt"
 scalaVersion := "2.12.6"
@@ -27,6 +29,12 @@ developers := List(
 lazy val root = (project in file(".")).settings(
   name := "sbt-jib",
   sbtPlugin := true,
+  sources in (Compile, doc) := Seq(),
+  scriptedBufferLog := false,
+  scriptedLaunchOpts ++= ManagementFactory.getRuntimeMXBean.getInputArguments.asScala.filter(
+    a => Seq("-Xmx", "-Xms", "-XX", "-Dsbt.log.noformat").exists(a.startsWith)
+  ),
+  scriptedLaunchOpts += ("-Dplugin.version=" + version.value),
   // Add the default sonatype repository setting
   publishTo := sonatypePublishTo.value,
   unmanagedSourceDirectories in Compile += baseDirectory.value / "jib" / "jib-core" / "src" / "main" / "java",
